@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function OrderPage() {
   const apiUrl = 'https://orders-managment-test-38e61b2e2912.herokuapp.com'; 
-//   const apiUrl = 'http://localhost:3001/'; 
+//   const apiUrl = 'http://localhost:3001'; 
   const [formData, setFormData] = useState({ name: "", email: "", productId: "", quantity: 1 });
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
@@ -13,26 +13,28 @@ export default function OrderPage() {
 
   useEffect(() => {
     fetchProducts();
-    if (token) {
-      fetchOrders();
-    }
   }, [token]);
 
   const fetchOrders = async () => {
-    try {
-        const tokenLocalStorage = localStorage.getItem("access_token");
-        const tokenSelect = token || tokenLocalStorage;
-      const response = await fetch(apiUrl + "/orders/me", {
-        headers: { Authorization: `Bearer ${tokenSelect}` },
-      });
-      if (!response.ok) throw new Error("Failed to fetch orders");
-      const data = await response.json();
-      console.log(data);
-      
-      setOrders(data);
-    } catch (err) {
-      setError(err.message);
-    }
+
+        try {
+            const tokenLocalStorage = localStorage.getItem("access_token");
+            console.log(token, tokenLocalStorage);
+            
+            const tokenSelect = token || tokenLocalStorage;
+        const response = await fetch(apiUrl + "/orders/me", {
+            headers: { Authorization: `Bearer ${tokenSelect}` },
+        });
+        if (!response.ok) throw new Error("Failed to fetch orders");
+        const data = await response.json();
+        console.log(data);
+        
+            setOrders(data);
+        } catch (err) {
+        setError(err.message);
+        }
+
+    
   };
 
   const fetchProducts = async () => {
@@ -53,20 +55,20 @@ export default function OrderPage() {
     e.preventDefault();
     setError("");
     try {
-      const response = await fetch(apiUrl + "/orders", {
+        const response = await fetch(apiUrl + "/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Order failed");
-      console.log(data);
-      
-      localStorage.setItem("acces_token", data.token);
-      setToken(data.token);
-      fetchOrders();
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Order failed");
+        console.log(data);
+        
+        localStorage.setItem("access_token", data.token);
+        setToken(data.token);
+        await fetchOrders();
     } catch (err) {
-      setError(err.message);
+        setError(err.message);
     }
   };
 
@@ -84,7 +86,7 @@ export default function OrderPage() {
       <h2 className="text-xl font-bold mb-4">Available Products</h2>
       <ul>
         {products.map((product) => (
-          <li key={product.id} className="border p-2 mb-2">Product ID: {product._id} - {product.name} - Price: {product.price} - Stock: {product.stock}</li>
+          <li key={product.id} className="border p-2 mb-2">Product ID: {product.id} - {product.name} - Price: {product.price} - Stock: {product.stock}</li>
         ))}
       </ul>
       <h2 className="text-xl font-bold mb-4">Your Orders</h2>
